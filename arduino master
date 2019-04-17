@@ -1,0 +1,34 @@
+#include <SPI.h>
+
+uint8_t const ssFPGA = 10;
+
+void setup()
+{
+    Serial.begin(115200);
+	while (!Serial) {
+		; // wait
+	}
+	Serial.println("spi_byte");
+    SPI.begin();
+    pinMode( ssFPGA, OUTPUT );
+}
+
+void loop() 
+{
+    digitalWrite( ssFPGA, 0 );
+    for ( uint8_t ii = 0; ii < 10; ii++) {
+        delay( 10 );
+        SPI.beginTransaction( SPISettings( 4000000, MSBFIRST, SPI_MODE3 ) );
+        {
+            uint8_t const miso = SPI.transfer(ii == 0 ? 0xAA : 0x55 );
+            Serial.println( miso, HEX );
+        }
+        SPI.endTransaction();
+    }
+    digitalWrite( ssFPGA, 1 );
+
+	static int ii = 0;
+	if (++ii % 1024 == 0) {
+		Serial.print(".");  // show a sign of life
+	}
+}
